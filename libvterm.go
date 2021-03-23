@@ -310,7 +310,7 @@ func go_screen_sb_pushline_callback(cols C.int, cells *C.cVTermScreenCell, user 
 	for _, cell := range sliceCells {
 		goCells = append(goCells, convertScreenCellToCell(screen, &cell))
 	}
-	if err := screen.callbacks.sbPushLineCallback(screen, goCells); err != nil {
+	if err := screen.callbacks.sbPushLine(screen, goCells); err != nil {
 		return 0
 	}
 	return 1
@@ -319,7 +319,7 @@ func go_screen_sb_pushline_callback(cols C.int, cells *C.cVTermScreenCell, user 
 //export go_screen_damage_callback
 func go_screen_damage_callback(rect C.VTermRect, user unsafe.Pointer) C.int {
 	screen := (*Screen)(user)
-	if err := screen.callbacks.damageCallback(rectFromVTermRect(rect)); err != nil {
+	if err := screen.callbacks.damage(rectFromVTermRect(rect)); err != nil {
 		return 0
 	}
 	return 1
