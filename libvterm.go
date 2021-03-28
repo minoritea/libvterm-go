@@ -253,7 +253,11 @@ func (attrs CellAttrs) MarshalJSON() ([]byte, error) {
 	// TODO: implement support for them.
 
 	b := []byte(str)
-	b[len(b)-1] = 0x7D // replace the last ',' with '}'.
+	if len(b) > 1 {
+		b[len(b)-1] = 0x7D // replace the last ',' with '}'.
+	} else {
+		b = append(b, 0x7D)
+	}
 	return b, nil
 }
 
