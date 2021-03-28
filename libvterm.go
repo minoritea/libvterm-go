@@ -7,7 +7,9 @@ package libvterm
 */
 import "C"
 import (
+	"encoding/json"
 	"fmt"
+	"golang.org/x/xerrors"
 	"log"
 	//	"sync"
 	"reflect"
@@ -195,16 +197,91 @@ type Color struct {
 	B uint8 `json:"blue"`
 }
 
+func (c Color) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf(`[%d,%d,%d]`, c.R, c.G, c.B)
+	return []byte(s), nil
+}
+
+func (c *Color) UnmarshalJSON(data []byte) error {
+	var a []uint8
+	err := json.Unmarshal(data, a)
+	if err != nil {
+		return err
+	}
+
+	if len(a) != 3 {
+		return xerrors.Errorf("Color must contan 3 elements: %q", string(data))
+	}
+
+	c.R, c.G, c.B = a[0], a[1], a[2]
+	return nil
+}
+
 type CellAttrs struct {
-	Bold      uint8 `json:"bold"`
-	Underline uint8 `json:"underline"`
-	Italic    uint8 `json:"italic"`
-	Blink     uint8 `json:"blink"`
-	Reverse   uint8 `json:"reverse"`
-	Strike    uint8 `json:"strike"`
-	Font      uint8 `json:"font"`
-	DWL       uint8 `json:"dwl"`
-	DHL       uint8 `json:"dhl"`
+	Bold      uint8 // `json:"bold"`
+	Underline uint8 // `json:"underline"`
+	Italic    uint8 // `json:"italic"`
+	Blink     uint8 // `json:"blink"`
+	Reverse   uint8 // `json:"reverse"`
+	Strike    uint8 // `json:"strike"`
+	Font      uint8 // `json:"font"`
+	DWL       uint8 // `json:"dwl"`
+	DHL       uint8 // `json:"dhl"`
+}
+
+func (attrs CellAttrs) MarshalJSON() ([]byte, error) {
+	var str string = `{`
+	if attrs.Bold > 0 {
+		str += `"bold":true,`
+	}
+	if attrs.Underline > 0 {
+		str += `"underline":true,`
+	}
+	if attrs.Italic > 0 {
+		str += `"italic":true,`
+	}
+	if attrs.Blink > 0 {
+		str += `"blink":true,`
+	}
+	if attrs.Reverse > 0 {
+		str += `"reverse":true,`
+	}
+	if attrs.Strike > 0 {
+		str += `"strike":true,`
+	}
+	// Font, DWL, DHL are currently ignored.
+	// TODO: implement support for them.
+
+	b := []byte(str)
+	b[len(b)-1] = 0x7D // replace the last ',' with '}'.
+	return b, nil
+}
+
+func (attr *CellAttrs) UnmarshalJSON(data []byte) error {
+	m := make(map[string]bool)
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
+	if on, ok := m["bold"]; ok && on {
+		attr.Bold = 1
+	}
+	if on, ok := m["underline"]; ok && on {
+		attr.Underline = 1
+	}
+	if on, ok := m["italic"]; ok && on {
+		attr.Italic = 1
+	}
+	if on, ok := m["reverse"]; ok && on {
+		attr.Reverse = 1
+	}
+	if on, ok := m["blink"]; ok && on {
+		attr.Blink = 1
+	}
+	if on, ok := m["strike"]; ok && on {
+		attr.Strike = 1
+	}
+	return nil
 }
 
 type Cell struct {

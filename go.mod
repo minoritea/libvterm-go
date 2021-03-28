@@ -8,4 +8,5 @@ require (
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/creack/pty v1.1.11
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 )
