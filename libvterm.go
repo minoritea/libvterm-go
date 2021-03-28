@@ -204,7 +204,7 @@ func (c Color) MarshalJSON() ([]byte, error) {
 
 func (c *Color) UnmarshalJSON(data []byte) error {
 	var a []uint8
-	err := json.Unmarshal(data, a)
+	err := json.Unmarshal(data, &a)
 	if err != nil {
 		return err
 	}
